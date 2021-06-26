@@ -1,4 +1,5 @@
 import yfinance as yf
+import matplotlib.pyplot as plt
 
 def collectData(ticker, startDate, endDate, period):
     tickerSymbol = ticker
@@ -11,14 +12,19 @@ def collectData(ticker, startDate, endDate, period):
 
 def main():
     ticker = "RELIANCE.NS"
-    startDate = "2012-01-01"
-    endDate = "2021-06-25"
+    startDate = "2021-05-26"
+    endDate = "2021-06-26"
     period="1d"
 
     relData = collectData(ticker, startDate, endDate, period)
+    closes = list(relData['Close'])
+    # print(closes)
+    time_period = [x for x in range(1, 24)]
+    
+    plt.plot(time_period, closes)
+    plt.xlabel("Time")
+    plt.ylabel("Price")
+    plt.show()
 
-    print("Open", "High", "Low")
-    for i in range(-1, -11, -1):
-        print(relData[len(relData) - i]['Open'], relData[len(relData) - i]['High'], relData[len(relData) - i]['Low'])
 
 main()
