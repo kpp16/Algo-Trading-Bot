@@ -1,9 +1,9 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import numpy as np
+import linearRegression
 
-clearance = 15
+threshold = 20
 
 def collectData(ticker, startDate, endDate, period):
     tickerSymbol = ticker
@@ -13,76 +13,107 @@ def collectData(ticker, startDate, endDate, period):
 
     return tickerDF
 
-def find_local_maxima(closes):
-    local_maxima = {}
+def find_maxima(closes):
+    maxima = {}
     for i in range(1, len(closes) - 1):
         if closes[i] > closes[i - 1] and closes[i] > closes[i + 1]:
-            local_maxima[i] = closes[i] + clearance
+            maxima[i] = closes[i] + threshold
     
-    return local_maxima
+    return maxima
 
-def find_local_minima(closes):
-    local_minima = {}
+def find_minima(closes):
+    minima = {}
     for i in range(1, len(closes) - 1):
         if closes[i] < closes[i - 1] and closes[i] < closes[i + 1]:
-            local_minima[i] = closes[i] - clearance
+            minima[i] = closes[i] - threshold
     
-    return local_minima
+    return minima
 
-def main():
-    ticker = "RELIANCE.NS"
-    startDate = "2021-04-26"
-    endDate = "2021-06-26"
+def find_minima_maxima_new(slope, intercept, n):
+    # y = mx + c
+    y = []
+
+    for i in range(n):
+        y.append((slope * i) + intercept)
+    
+    return y
+
+def find_mid(maxima, minima, n):
+    y = []
+    for i in range(n):
+        y.append((minima[i] + maxima[i]) / 2)
+    
+    return y
+
+def get_breakout(ticker, startDate, endDate):
+    # ticker = "ASIANPAINT.NS"
+    # startDate = "2021-04-27"
+    # endDate = "2021-06-27"
     period="1d"
+    data = collectData(ticker, startDate, endDate, period)
+    closes = list(data['Close'])
+    time_period = [x for x in range(1, len(closes) + 1)]
 
-    relData = collectData(ticker, startDate, endDate, period)
-    closes = list(relData['Close'])
+    maxima_closes = np.array(list(find_maxima(closes).values()))
+    maxima_time = np.array(list(find_maxima(closes).keys()))
 
-    time_period = np.array([x for x in range(1, 45)])
+    minima_closes = np.array(list(find_minima(closes).values()))
+    minima_time = np.array(list(find_minima(closes).keys()))
 
-    maximas = find_local_maxima(closes)
-    minimas = find_local_minima(closes)
+    # print("Maxima:")
+    max_int, max_slope = linearRegression.find_slope_intercept(maxima_time, maxima_closes)
 
-    maxima_closes = np.array(list(maximas.values()))
-    maxima_time = np.array(list(maximas.keys()))
+    # print()
 
-    minima_closes = np.array(list(minimas.values()))
-    minima_time = np.array(list(minimas.keys()))
+    # print("Minima:")
+    min_int, min_slope = linearRegression.find_slope_intercept(minima_time, minima_closes)
 
-    fig = plt.figure()
+    new_minima = find_minima_maxima_new(min_slope, min_int, len(time_period))
+    new_maxima = find_minima_maxima_new(max_slope, max_int, len(time_period))
+    mid = find_mid(new_maxima, new_minima, len(time_period))
 
-    fig.add_subplot(231)
-    plt.plot(maxima_time, maxima_closes, color='red')
-    plt.plot(minima_time, minima_closes, color='green')
-    plt.plot(time_period, closes)
-    plt.xlabel("Time (Days since 2021-04-26)")
-    plt.ylabel("Price (INR)")
-    plt.title("RELIND.NS")
+    # print()
+    # print("Today's Resistance:", new_maxima[-1])
+    # print("Today's Security:", new_minima[-1])
+    # print("Today's breakout:", mid[-1])
 
-    red_patch = mpatches.Patch(color='red', label='Resistance')
-    green_patch = mpatches.Patch(color='green', label='Securities')
-    blue_patch = mpatches.Patch(color='blue', label='Close values')
+    # fig = plt.figure()
 
-    plt.legend(handles=[red_patch, green_patch, blue_patch])
+    # fig.add_subplot(221)
+    # plt.title("ASIANPAINT.NS")
+    # plt.plot(maxima_time, maxima_closes, color='green', label="Resistance")
+    # plt.plot(minima_time, minima_closes, color='red', label="Security")
+    # plt.plot(time_period, closes, color="blue", label="Close")
+    # plt.legend()
+    # plt.xlabel("Time")
+    # plt.ylabel("Price")
 
-    fig.add_subplot(232)
-    plt.title("Maxima closes")
-    plt.scatter(maxima_time, maxima_closes, color='red')
-    red_patch112 = mpatches.Patch(color='red', label='Resistance')
-    plt.xlabel("Time (Days since 2021-04-26)")
-    plt.ylabel("Price (INR)")    
-    plt.legend(handles=[red_patch112])
+    # fig.add_subplot(222)
+    # plt.title("Resistance")
+    # plt.scatter(maxima_time, maxima_closes, color='green', label="Resistance")
+    # plt.plot(time_period, new_maxima, color="black")
+    # plt.legend()
+    # plt.xlabel("Time")
+    # plt.ylabel("Price")
 
-    fig.add_subplot(233)
-    plt.title("Minima closes")
-    plt.scatter(minima_time, minima_closes, color='green')
-    green_patch113 = mpatches.Patch(color='green', label='Resistance')
-    plt.xlabel("Time (Days since 2021-04-26)")
-    plt.ylabel("Price (INR)")    
-    plt.legend(handles=[green_patch113])
+    # fig.add_subplot(223)
+    # plt.title("Security")
+    # plt.scatter(minima_time, minima_closes, color='red', label="Security")
+    # plt.plot(time_period, new_minima, color="black")
+    # plt.legend()
+    # plt.xlabel("Time")
+    # plt.ylabel("Price")
 
+    # fig.add_subplot(224)
+    # plt.title("ASIANPAINT.NS NEW")
+    # plt.plot(time_period, new_maxima, color='green', label="Resistance")
+    # plt.plot(time_period, new_minima, color='red', label="Security")
+    # plt.plot(time_period, closes, color="blue", label="Close")
+    # plt.plot(time_period, mid, color="purple", label="Mid")
+    # plt.legend()
+    # plt.xlabel("Time")
+    # plt.ylabel("Price")
 
-    plt.show()
+    # plt.show()
 
-
-main()
+    return float(mid[-1][0])
