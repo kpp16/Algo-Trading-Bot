@@ -49,6 +49,7 @@ def get_breakout(ticker, startDate, endDate):
     # ticker = "ASIANPAINT.NS"
     # startDate = "2021-04-27"
     # endDate = "2021-06-27"
+    
     period="1d"
     data = collectData(ticker, startDate, endDate, period)
     closes = list(data['Close'])
