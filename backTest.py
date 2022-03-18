@@ -2,7 +2,7 @@ from collectData import get_breakout, collectData
 import datetime
 import csv
 
-ticker = "CIPLA.NS"
+ticker = "TSLA"
 filename = ticker + ".csv"
 
 def write_into_csv(line):
@@ -15,8 +15,8 @@ def back_test():
         writer = csv.writer(f)
         writer.writerow(["Ticker", "Buy/Sell", "Quantity", "Stock Price", "Amount (INR)", "Holding", "Total Money With Holds (INR)"])
 
-    start_date_O = "2018-06-28"
-    end_date = "2020-06-27"
+    start_date_O = "2015-06-28"
+    end_date = "2020-01-11"
     breakout = get_breakout(ticker, start_date_O, end_date)
 
     print(breakout)
@@ -25,8 +25,8 @@ def back_test():
     curr_money = 10000
     holding = 0
 
-    start_date = "2020-06-28"
-    end_date = "2021-06-28"
+    start_date = "2020-01-12"
+    end_date = "2022-03-12"
     newData = collectData(ticker, start_date, end_date, "1d")
 
     closes = list(newData['Close'])

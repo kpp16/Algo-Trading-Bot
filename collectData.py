@@ -118,3 +118,6 @@ def get_breakout(ticker, startDate, endDate):
     # plt.show()
 
     return float(mid[-1][0])
+
+
+get_breakout("TSLA", "2018-06-28", "2022-03-12")
