@@ -1,7 +1,7 @@
 # Algo-Trading-Bot
 
 ## Project Description
-An algorithimc trading bot that trades various stocks using the alpaca API.
+An algorithmic trading bot that trades various stocks using the Alpaca API.
 
 ## Getting Started
 
